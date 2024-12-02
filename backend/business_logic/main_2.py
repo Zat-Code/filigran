@@ -1,4 +1,4 @@
-from strix_extrator import StixExtractor
+from backend.business_logic.stix_extractor import StixExtractor
 from pdf_extractor import PdfExtractor
 from rapidfuzz import fuzz, process
 import os

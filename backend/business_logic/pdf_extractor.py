@@ -93,19 +93,20 @@ class PdfExtractor:
         for segment in segments:
             entities = self.model.predict_entities(segment, labels=labels)
             all_entities.extend(entities)
-
+            
         # Regroupe et calcule la fréquence et la moyenne des scores pour chaque entité
-        entity_summary = defaultdict(lambda: {'count': 0, 'total_score': 0.0})
+        entity_summary = defaultdict(lambda: {'count': 0, 'total_score': 0.0, 'locations': []})
 
         for entity in all_entities:
             entity_text = entity['text']
             entity_score = entity['score']
             entity_summary[entity_text]['count'] += 1
             entity_summary[entity_text]['total_score'] += entity_score
+            entity_summary[entity_text]['locations'].append((entity['start'], entity['end']))
 
         # Calcul des moyennes
         summary_list = [
-            {'entity': entity_text, 'count': data['count'], 'average_score': data['total_score'] / data['count']}
+            {'entity': entity_text, 'count': data['count'], 'average_score': data['total_score'] / data['count'], 'locations': data['locations']}
             for entity_text, data in entity_summary.items()
         ]
 

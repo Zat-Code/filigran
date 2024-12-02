@@ -1,21 +1,14 @@
 from fastapi import APIRouter, File, UploadFile, HTTPException
-from business_logic.strix_extrator import StixExtractor
-from business_logic.pdf_extractor import PdfExtractor
 from fastapi.responses import JSONResponse
 import json
 import os
-
+from services.associate_stix_with_pdfs import associate_stix_with_pdfs
 
 # Créez un routeur pour les routes de comparaison
 router = APIRouter()
 
-# Initialisez les extracteurs
-pdf_extractor = PdfExtractor()
-stix_extractor = StixExtractor()
-
 # Répertoire contenant les fichiers PDF
 PDF_DIRECTORY = "data/pdfs/"
-
 
 @router.post("/aggregator")
 async def compare_stix_with_pdfs(file: UploadFile = File(...)):
@@ -33,24 +26,12 @@ async def compare_stix_with_pdfs(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=400, detail="Erreur lors de la lecture du fichier JSON.")
     
-    # Extraire les malwares du fichier STIX
-    stix_malwares = stix_extractor.extract_from_content(stix_data)
+    # Appeler le service associate_stix_with_pdfs
+    matched_results = await associate_stix_with_pdfs(stix_data)
 
-    if not stix_malwares:
-        raise HTTPException(status_code=400, detail="Aucun malware trouvé dans le fichier STIX.")
+    # Vérifier si des correspondances ont été trouvées
+    if not matched_results:
+        raise HTTPException(status_code=400, detail="Aucune correspondance trouvée entre les malwares STIX et les fichiers PDF.")
 
-    # Comparer avec tous les fichiers PDF
-    results = []
-    for pdf_file in os.listdir(PDF_DIRECTORY):
-        pdf_path = os.path.join(PDF_DIRECTORY, pdf_file)
-        pdf_text = pdf_extractor.extract_text_from_pdf(pdf_path)
-        pdf_malwares = pdf_extractor.predict(pdf_text)
-
-        # Comparaison des malwares
-        common_malwares = set(m['entity'] for m in pdf_malwares).intersection(stix_malwares)
-        results.append({
-            "pdf_file": pdf_file,
-            "common_malwares": list(common_malwares)
-        })
-
-    return JSONResponse(content={"results": results})
+    # Retourner les résultats
+    return JSONResponse(content={"matches": matched_results})

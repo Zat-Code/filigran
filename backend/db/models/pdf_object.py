@@ -5,4 +5,4 @@ class PDFObject(BaseModel):
     file_name: str = Field(..., description="Nom du fichier PDF")
     file_path: str = Field(..., description="Chemin du fichier PDF")
     extracted_text: str = Field(..., description="Texte extrait du fichier PDF")
-    predictor_output: List[Dict[str, Any]] = Field(..., description="Résultats du prédicteur")
+    malwares: List[Dict[str, Any]] = Field(..., description="Résultats du prédicteur")
