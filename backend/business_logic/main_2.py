@@ -1,6 +1,5 @@
-from pdf_extractor import PdfExtractor
 from strix_extrator import StixExtractor
-from predictor import Predictor
+from pdf_extractor import PdfExtractor
 from rapidfuzz import fuzz, process
 import os
 
@@ -47,7 +46,6 @@ def main():
 
     strix_extractor = StixExtractor()
     extractor = PdfExtractor()
-    predictor = Predictor()
 
     # Associer les fichiers STIX et PDF
     file_pairs = associate_files(stix_folder, pdf_folder)
@@ -58,9 +56,9 @@ def main():
 
 
             strix_malwares = strix_extractor.extract(stix_file)
-            pdf_text = extractor.extract(pdf_file)
+            pdf_text =  extractor.extract_text_from_pdf(pdf_file)
 
-            pdf_malwares = predictor.predict(pdf_text)
+            pdf_malwares =  extractor.predict(pdf_text)
             fuzzy_matches = reconcile_fuzzy([malware["entity"] for malware in pdf_malwares], strix_malwares)
 
             print(fuzzy_matches)
