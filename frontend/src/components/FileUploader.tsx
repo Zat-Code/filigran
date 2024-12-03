@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { ResultViewer } from "./ResultViewer";
 
 const FileUploader = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -38,90 +39,77 @@ const FileUploader = () => {
   };
 
   return (
-    <div>
-      <input type="file" onChange={handleFileChange} />
-      <button onClick={handleUpload} disabled={loading}>
-        {loading ? "Chargement..." : "Envoyer"}
-      </button>
-      {error && <div className="text-red-500">{error}</div>}
-      {results && (
-        <div>
-          <h2 className="text-xl font-bold mb-4">Résultats :</h2>
-          {results.map((result, index) => (
-            <div key={index} className="mb-8 p-4 border rounded">
-              <h3 className="text-lg font-bold mb-2">Fichier PDF : {result.pdf_file}</h3>
-              
-              {/* Liste des malwares trouvés */}
-              <div className="mb-4 p-4 bg-black-50 rounded">
-                <h4 className="font-semibold mb-2">Malwares détectés :</h4>
-                {result.matches.map((match, i) => (
-                  <div key={i} className="mb-1 flex items-center gap-2">
-                    <span className="bg-red-600 px-2 py-1 rounded">
-                      {match.pdf_malware}
-                    </span>
-                    <span className="text-white-600">→</span>
-                    <span className="font-medium">{match.stix_malware}</span>
-                    <span className="text-white-600">
-                      (Score: {match.score}%)
-                    </span>
-                    <span className="text-white-600">
-                      ({match.locations.length} occurrence{match.locations.length > 1 ? 's' : ''})
-                    </span>
+    <div className="min-h-screen bg-gray-900 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section upload */}
+        <div className="max-w-3xl mx-auto bg-gray-800 rounded-lg shadow-xl p-8 mb-8">
+          <h2 className="text-2xl font-bold text-white mb-6 text-center">
+            Analyse de fichier STIX
+          </h2>
+          
+          <div className="space-y-4">
+            {/* Zone de drop ou sélection de fichier */}
+            <div className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center">
+              <input
+                type="file"
+                onChange={handleFileChange}
+                className="hidden"
+                id="file-upload"
+                accept=".json,.xml,.stix"
+              />
+              <label
+                htmlFor="file-upload"
+                className="cursor-pointer text-gray-300 hover:text-white"
+              >
+                <div className="space-y-2">
+                  <div className="mx-auto h-12 w-12 text-gray-400">
+                    📁
                   </div>
-                ))}
-              </div>
-
-              {/* Texte complet avec surlignage */}
-              <div className="whitespace-pre-wrap font-mono text-sm bg-black-50 p-4 rounded border">
-                {highlightMatches(result.extracted_text, result.matches)}
-              </div>
+                  <div className="text-sm">
+                    <span className="text-red-500 hover:text-red-400">
+                      Cliquez pour sélectionner
+                    </span>
+                    {" "}ou glissez-déposez un fichier STIX
+                  </div>
+                </div>
+              </label>
+              {file && (
+                <div className="mt-4 text-sm text-gray-300">
+                  Fichier sélectionné : {file.name}
+                </div>
+              )}
             </div>
-          ))}
+
+            {/* Bouton d'envoi */}
+            <div className="text-center">
+              <button
+                onClick={handleUpload}
+                disabled={loading}
+                className={`
+                  px-4 py-2 rounded-md text-white font-medium
+                  ${loading 
+                    ? 'bg-gray-600 cursor-not-allowed' 
+                    : 'bg-red-600 hover:bg-red-700'}
+                `}
+              >
+                {loading ? "Chargement..." : "Analyser le fichier"}
+              </button>
+            </div>
+
+            {/* Message d'erreur */}
+            {error && (
+              <div className="text-red-500 text-center text-sm mt-2">
+                {error}
+              </div>
+            )}
+          </div>
         </div>
-      )}
+
+        {/* Affichage des résultats */}
+        {results && <ResultViewer results={results} />}
+      </div>
     </div>
   );
-};
-
-// Fonction pour surligner les correspondances dans le texte
-const highlightMatches = (text: string, matches: any[]) => {
-  const segments: { text: string; isMatch: boolean }[] = [];
-  let currentPosition = 0;
-
-  const allPositions = matches.flatMap(match =>
-    match.locations.map(([start, end]: number[]) => ({ start, end }))
-  ).sort((a, b) => a.start - b.start);
-
-  allPositions.forEach(({ start, end }) => {
-    if (start > currentPosition) {
-      segments.push({
-        text: text.slice(currentPosition, start),
-        isMatch: false
-      });
-    }
-    segments.push({
-      text: text.slice(start, end),
-      isMatch: true
-    });
-    currentPosition = end;
-  });
-
-  if (currentPosition < text.length) {
-    segments.push({
-      text: text.slice(currentPosition),
-      isMatch: false
-    });
-  }
-
-  return segments.map((segment, index) => (
-    segment.isMatch ? (
-      <span key={index} className="bg-red-700 font-bold">
-        {segment.text}
-      </span>
-    ) : (
-      <span key={index}>{segment.text}</span>
-    )
-  ));
 };
 
 export default FileUploader;
