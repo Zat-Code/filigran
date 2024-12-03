@@ -28,7 +28,7 @@ const FileUploader = () => {
     setError(null);
 
     try {
-      const response = await axios.post("http://localhost:8000/aggregator", formData, {
+      const response = await axios.post("http://localhost:8000/aggregator/", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setResults(response.data.matches); // Mettre à jour les résultats avec les correspondances

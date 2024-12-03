@@ -10,7 +10,7 @@ router = APIRouter()
 # Répertoire contenant les fichiers PDF
 PDF_DIRECTORY = "data/pdfs/"
 
-@router.post("/aggregator")
+@router.post("/")
 async def compare_stix_with_pdfs(file: UploadFile = File(...)):
     """
     Endpoint permettant de comparer un fichier STIX JSON uploadé à une base de fichiers PDF.
@@ -23,12 +23,21 @@ async def compare_stix_with_pdfs(file: UploadFile = File(...)):
     try:
         content = await file.read()
         stix_data = json.loads(content)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail="Erreur lors de la lecture du fichier JSON.")
-    
-    # Appeler le service associate_stix_with_pdfs
-    matched_results = await associate_stix_with_pdfs(stix_data)
+        
+        # Sauvegarder temporairement le fichier
+        temp_file_path = "temp_stix.json"
+        with open(temp_file_path, "w") as f:
+            json.dump(stix_data, f)
+        
+        # Appeler le service avec le chemin du fichier
+        matched_results = await associate_stix_with_pdfs(temp_file_path)
+        
+        # Nettoyer le fichier temporaire
+        os.remove(temp_file_path)
 
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Erreur lors du traitement du fichier JSON: {str(e)}")
+    
     # Vérifier si des correspondances ont été trouvées
     if not matched_results:
         raise HTTPException(status_code=400, detail="Aucune correspondance trouvée entre les malwares STIX et les fichiers PDF.")
