@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:5.0
+    container_name: mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  mongo-express:
+    image: mongo-express:0.54.0
+    container_name: mongo-express
+    restart: always
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: password
+      ME_CONFIG_MONGODB_SERVER: mongodb
+    ports:
+      - "8081:8081"
+
+  fastapi-app:
+    image: python:3.11-slim  # Utiliser une image de base Python légère
+    container_name: fastapi-app
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
+    working_dir: /app
+    volumes:
+      - ./backend:/app  # Mapper le code source local dans le conteneur
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongodb
+  
+  react-app:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: react-app
+    restart: always
+    ports:
+      - "80:80"  # 3000 en local redirigé vers le port 80 du conteneur
+    depends_on:
+      - fastapi-app
+
+volumes:
+  mongo_data:
+    driver: local

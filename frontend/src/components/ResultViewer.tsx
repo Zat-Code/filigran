@@ -1,8 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { Match, ResultViewerProps } from "../model/Match";
 
-interface ResultViewerProps {
-  results: any[];
-}
 
 export const ResultViewer: React.FC<ResultViewerProps> = ({ results }) => {
   const [showTexts, setShowTexts] = useState<{ [key: number]: boolean }>({});
@@ -66,7 +64,7 @@ export const ResultViewer: React.FC<ResultViewerProps> = ({ results }) => {
           <div className="mb-6 p-4 bg-gray-700 rounded-lg">
             <h4 className="font-semibold mb-3 text-white">Malwares détectés :</h4>
             <div className="grid gap-2">
-              {result.matches.map((match, i) => (
+              {result.matches.map((match: Match, i: number) => (
                 <div key={i} className="flex items-center gap-2 text-sm">
                   <span className="bg-red-600 px-2 py-1 rounded text-white">
                     {match.pdf_malware}

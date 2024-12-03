@@ -3,7 +3,7 @@ from pymongo.errors import ConnectionFailure
 import asyncio
 import os
 
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://admin:password@localhost:27017")
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://admin:password@mongodb:27017")
 DB_NAME = os.getenv("DB_NAME", "filigran")
 
 client = None
