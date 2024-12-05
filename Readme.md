@@ -1,5 +1,5 @@
 # 🚀**Aggregator Stix/PDF**
-Cet outil permet de comparer des fichiers STIX JSON à des PDF afin d'identifier et de mettre en évidence des correspondances, comme des malwares ou des termes spécifiques. L'application dispose d'une interface frontend intuitive et d'un backend puissant pour le traitement des données.
+Cet outil permet de comparer des fichiers STIX JSON à des PDF afin d'identifier et de mettre en évidence des correspondances, comme des malwares ou des termes spécifiques. L'application dispose d'une interface frontend et d'un backend pour le traitement des données.
 
 ## 🖼️ Exemple de la vue principale :
 ![frondend](doc/frontend-1.png)
